@@ -14,7 +14,8 @@
         <activity android:name=".SettingsActivity"></activity>
         <activity
             android:name=".DetailActivity"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"></meta-data>
