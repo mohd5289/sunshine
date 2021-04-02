@@ -57,6 +57,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -73,9 +74,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity
-        implements ForecastAdapter.forecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String []> {
 
+public class MainActivity extends AppCompatActivity
+        implements ForecastAdapter.forecastAdapterOnClickHandler,
+        LoaderManager.LoaderCallbacks<String []>
+      ,SharedPreferences.OnSharedPreferenceChangeListener {
+    private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
      private  TextView mWeatherTextView;
      private TextView mErrorMessage;
      private ProgressBar mProgressBar;
@@ -120,6 +124,9 @@ public class MainActivity extends AppCompatActivity
         /* Once all of our views are setup, we can load the weather data. */
         loadWeatherData();
         getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback);
+        Log.d(TAG, "onCreate: registering preference changed listener");
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
     }
 
     // COMPLETED (8) Create a method that will get the user's preferred location and execute your new AsyncTask and call it loadWeatherData
@@ -151,7 +158,9 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
+    private void invalidateData() {
+        mForecastAdapter.setWeatherData(null);
+    }
 
 
     @NonNull
@@ -228,7 +237,7 @@ public class MainActivity extends AppCompatActivity
 
 
             private void openLocationInMap() {
-                String addressString = "1600 Ampitheatre Parkway, CA";
+                String addressString  = SunshinePreferences.getPreferredWeatherLocation(this);;
                 Uri geoLocation = Uri.parse("geo:0,0?q=" + addressString);
 
                 Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -275,4 +284,26 @@ public class MainActivity extends AppCompatActivity
             }
 
 
+    @Override
+    protected void onStart() {
+        if (PREFERENCES_HAVE_BEEN_UPDATED) {
+            Log.d(TAG, "onStart: preferences were updated");
+            getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
+
+            PREFERENCES_HAVE_BEEN_UPDATED = false;
         }
+        super.onStart();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        /* Unregister MainActivity as an OnPreferenceChangedListener to avoid any memory leaks. */
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        PREFERENCES_HAVE_BEEN_UPDATED = true;
+    }
+}
