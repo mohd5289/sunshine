@@ -19,7 +19,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import androigitdx.annotation.Nullable;
+
 
 /**
  * Manages a local database for weather data.
@@ -31,7 +31,7 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "weather.db";
 
-    public WeatherDbHelper(@Nullable Context context) {
+    public WeatherDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
