@@ -194,4 +194,13 @@ public final class SunshineDateUtils {
             return dayFormat.format(dateInMillis);
         }
     }
+
+    public static boolean isDateNormalized(long millisSinceEpoch) {
+        boolean isDateNormalized = false;
+        if (millisSinceEpoch % DAY_IN_MILLIS == 0) {
+            isDateNormalized = true;
+        }
+
+        return isDateNormalized;
+    }
 }
