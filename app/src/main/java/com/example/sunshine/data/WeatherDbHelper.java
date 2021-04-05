@@ -59,8 +59,8 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                         WeatherContract.WeatherEntry.COLUMN_PRESSURE   + " REAL, "                    +
 
                         WeatherContract.WeatherEntry.COLUMN_WIND_SPEED + " REAL, "                    +
-                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL" +
-                        " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATE + ") ON CONFLICT REPLACE);";;
+                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL," +
+                        " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATE + ") ON CONFLICT REPLACE);";
 
 
                         db.execSQL(SQL_CREATE_WEATHER_TABLE);
