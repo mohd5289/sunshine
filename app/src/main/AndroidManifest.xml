@@ -34,5 +34,6 @@
         android:exported="false"></provider>
 
     </application>
-
+<!--<service android:name=".sync.SunshineSyncIntentService"-->
+<!--    android:exported="false" />-->
 </manifest>

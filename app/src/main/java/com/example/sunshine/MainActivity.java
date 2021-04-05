@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
      private ProgressBar mProgressBar;
      private RecyclerView mRecyclerView;
      private ForecastAdapter mForecastAdapter;
-    private static final int FORECAST_LOADER_ID = 0;
+    private static final int FORECAST_LOADER_ID = 44;
     private static final String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity
         // COMPLETED (9) Call loadWeatherData to perform the network request to get the weather
         /* Once all of our views are setup, we can load the weather data. */
         loadWeatherData();
-        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback);
+        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, MainActivity.this);
         Log.d(TAG, "onCreate: registering preference changed listener");
 
     }
@@ -131,20 +131,10 @@ public class MainActivity extends AppCompatActivity
   }
 
 
-    @Override
-    public void onClick(String weatherForTheDay) {
-        Context context = this;
-        Toast.makeText(context, weatherForTheDay, Toast.LENGTH_SHORT);
-    Intent detailToStartActivityIntent = new Intent(this,DetailActivity.class);
-    detailToStartActivityIntent.putExtra(Intent.EXTRA_TEXT, weatherForTheDay);
-    startActivity(detailToStartActivityIntent);
-    }
 
 
 
-
-
-    private void showLoading() {
+          private void showLoading() {
                /* Then, hide the weather data */
                mRecyclerView.setVisibility(View.INVISIBLE);
                /* Finally, show the loading indicator */
@@ -269,4 +259,12 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-}
+           @Override
+           public void onClick(long date) {
+               Intent weatherDetailIntent = new Intent(MainActivity.this, DetailActivity.class);
+//      COMPLETED (39) Refactor onClick to pass the URI for the clicked date with the Intent
+               Uri uriForDateClicked = WeatherContract.WeatherEntry.buildWeatherUriWithDate(date);
+               weatherDetailIntent.setData(uriForDateClicked);
+               startActivity(weatherDetailIntent);
+           }
+       }

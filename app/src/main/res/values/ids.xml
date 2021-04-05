@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="date" type="id"/>
+    <item name="weather_description" type="id"/>
+    <item name="high_temperature" type="id"/>
+    <item name="low_temperature" type="id"/>
+    <item name="humidity" type="id"/>
+    <item name="pressure" type="id"/>
+    <item name="wind" type="id"/>
+</resources>

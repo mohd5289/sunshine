@@ -28,7 +28,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class WeatherDbHelper extends SQLiteOpenHelper {
 
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "weather.db";
 
     public WeatherDbHelper(Context context) {
@@ -59,13 +59,17 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                         WeatherContract.WeatherEntry.COLUMN_PRESSURE   + " REAL, "                    +
 
                         WeatherContract.WeatherEntry.COLUMN_WIND_SPEED + " REAL, "                    +
-                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL" + ");";
+                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL" +
+                        " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATE + ") ON CONFLICT REPLACE);";;
 
+
+                        db.execSQL(SQL_CREATE_WEATHER_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS " + WeatherContract.WeatherEntry.TABLE_NAME);
+        onCreate(db);
     }
 
 //  TODO (12) Create a public static final String called DATABASE_NAME with value "weather.db"

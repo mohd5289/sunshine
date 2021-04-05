@@ -1,7 +1,9 @@
 package com.example.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sunshine.data.WeatherContract;
 import com.example.sunshine.utilities.*;
 
 public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.ForecastAdapterViewHolder> {
@@ -19,7 +22,7 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
   private final Context mContext;
     private Cursor mCursor;
     public interface forecastAdapterOnClickHandler{
-        void onClick(String weatherForTheDay);
+        void onClick(long date);
 
     }
 
@@ -41,9 +44,11 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
 
         @Override
         public void onClick(View v) {
-        int adapterPosition =getAdapterPosition();
-        String weatherForDay = weatherSummary.getText().toString();
-        mClickHandler.onClick(weatherForDay);
+            int adapterPosition = getAdapterPosition();
+//          COMPLETED (37) Instead of passing the String for the clicked item, pass the date from the cursor
+            mCursor.moveToPosition(adapterPosition);
+            long dateInMillis = mCursor.getLong(MainActivity.INDEX_WEATHER_DATE);
+            mClickHandler.onClick(dateInMillis);
         }
 
 
