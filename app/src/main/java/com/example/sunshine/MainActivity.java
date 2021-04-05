@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity
         loadWeatherData();
         getSupportLoaderManager().initLoader(loaderId, bundleForLoader, MainActivity.this);
         Log.d(TAG, "onCreate: registering preference changed listener");
-        SunshineSyncUtils.startImmediateSync(this);
+        SunshineSyncUtils.initialize(this);
 
     }
 
