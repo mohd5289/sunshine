@@ -319,7 +319,7 @@ public final class SunshineWeatherUtils {
      *
      * @return resource id for the corresponding icon. -1 if no relation is found.
      */
-    public static int getIconResourceForWeatherCondition(int weatherId) {
+    public static int getSmallArtResourceIdForWeatherCondition(int weatherId) {
         /*
          * Based on weather code data found at:
          * See http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
@@ -358,7 +358,7 @@ public final class SunshineWeatherUtils {
      *
      * @return resource id for the corresponding icon. -1 if no relation is found.
      */
-    public static int getArtResourceForWeatherCondition(int weatherId) {
+    public static int getLargeArtResourceIdForWeatherCondition(int weatherId) {
         /*
          * Based on weather code data found at:
          * http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
