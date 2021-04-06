@@ -19,46 +19,102 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
+
 
 import androidx.annotation.NonNull;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.example.sunshine.data.WeatherContract;
 
 
-// COMPLETED (9) Create a class called SunshineSyncUtils
+import java.util.concurrent.TimeUnit;
+
 public class SunshineSyncUtils {
 
+//  COMPLETED (10) Add constant values to sync Sunshine every 3 - 4 hours
+    /*
+     * Interval at which to sync with the weather. Use TimeUnit for convenience, rather than
+     * writing out a bunch of multiplication ourselves and risk making a silly mistake.
+     */
+    private static final int SYNC_INTERVAL_HOURS = 3;
+    private static final int SYNC_INTERVAL_SECONDS = (int) TimeUnit.HOURS.toSeconds(SYNC_INTERVAL_HOURS);
+    private static final int SYNC_FLEXTIME_SECONDS = SYNC_INTERVAL_SECONDS / 3;
+
     private static boolean sInitialized;
-    //  COMPLETED (10) Create a public static void method called startImmediateSync
+
+//  COMPLETED (11) Add a sync tag to identify our sync job
+    private static final String SUNSHINE_SYNC_TAG = "sunshine-sync";
+
+//  COMPLETED (12) Create a method to schedule our periodic weather sync
     /**
-     * Helper method to perform a sync immediately using an IntentService for asynchronous
-     * execution.
+     * Schedules a repeating sync of Sunshine's weather data using FirebaseJobDispatcher.
+     * @param context Context used to create the GooglePlayDriver that powers the
+     *                FirebaseJobDispatcher
+     */
+    static void scheduleFirebaseJobDispatcherSync(@NonNull final Context context) {
+
+
+        Data input = new Data.Builder()
+                .putString("SUNSHINE_SYNC_TAG", "sunshine-sync")
+                .build();
+
+        Constraints constraints = new Constraints.Builder()
+                // The Worker needs Network connectivity
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                // Needs the device to be charging
+                .build();
+        PeriodicWorkRequest request =
+                // Executes MyWorker every 15 minutes
+                new PeriodicWorkRequest.Builder(SunshineFirebaseJobService.class,
+                        SYNC_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                        // Sets the input data for the ListenableWorker
+                        .setInputData(input)
+                        .setConstraints(constraints)
+                        .build(); // other setters (as above)
+
+        /* Schedule the Job with the dispatcher */
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("com.example.sunshine",
+                ExistingPeriodicWorkPolicy.KEEP.KEEP,request);
+    }
+    /**
+     * Creates periodic sync tasks and checks to see if an immediate sync is required. If an
+     * immediate sync is required, this method will take care of making sure that sync occurs.
      *
-     * @param context The Context used to start the IntentService for the sync.
+     * @param context Context that will be passed to other methods and used to access the
+     *                ContentResolver
      */
     synchronized public static void initialize(@NonNull final Context context) {
 
-//      COMPLETED (3) Only execute this method body if sInitialized is false
         /*
          * Only perform initialization once per app lifetime. If initialization has already been
          * performed, we have nothing to do in this method.
          */
         if (sInitialized) return;
 
-//      COMPLETED (4) If the method body is executed, set sInitialized to true
         sInitialized = true;
 
-//      COMPLETED (5) Check to see if our weather ContentProvider is empty
+//      COMPLETED (13) Call the method you created to schedule a periodic weather sync
+        /*
+         * This method call triggers Sunshine to create its task to synchronize weather data
+         * periodically.
+         */
+        scheduleFirebaseJobDispatcherSync(context);
+
         /*
          * We need to check to see if our ContentProvider has data to display in our forecast
          * list. However, performing a query on the main thread is a bad idea as this may
          * cause our UI to lag. Therefore, we create a thread in which we will run the query
          * to check the contents of our ContentProvider.
          */
-        new AsyncTask<Void, Void, Void>() {
+        Thread checkForEmpty = new Thread(new Runnable() {
             @Override
-            public Void doInBackground( Void... voids ) {
+            public void run() {
 
                 /* URI for every row of weather data in our weather table*/
                 Uri forecastQueryUri = WeatherContract.WeatherEntry.CONTENT_URI;
@@ -94,20 +150,26 @@ public class SunshineSyncUtils {
                  * If the Cursor was null OR if it was empty, we need to sync immediately to
                  * be able to display data to the user.
                  */
-                //  COMPLETED (6) If it is empty or we have a null Cursor, sync the weather now!
                 if (null == cursor || cursor.getCount() == 0) {
                     startImmediateSync(context);
                 }
 
                 /* Make sure to close the Cursor to avoid memory leaks! */
                 cursor.close();
-                return null;
             }
-        }.execute();
+        });
+
+        /* Finally, once the thread is prepared, fire it off to perform our checks. */
+        checkForEmpty.start();
     }
 
+    /**
+     * Helper method to perform a sync immediately using an IntentService for asynchronous
+     * execution.
+     *
+     * @param context The Context used to start the IntentService for the sync.
+     */
     public static void startImmediateSync(@NonNull final Context context) {
-//      COMPLETED (11) Within that method, start the SunshineSyncIntentService
         Intent intentToSyncImmediately = new Intent(context, SunshineSyncIntentService.class);
         context.startService(intentToSyncImmediately);
     }

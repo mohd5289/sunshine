@@ -32,8 +32,16 @@
         android:authorities="com.example.sunshine"
         android:name=".data.WeatherProvider"
         android:exported="false"></provider>
-
+        <service android:name=".sync.SunshineSyncIntentService"
+            android:exported="false" />
+        <service
+            android:name=".sync.SunshineFirebaseJobService"
+            android:exported="false">
+            <!-- COMPLETED (9) Declare an intent filter with the action ACTION_EXECUTE -->
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
     </application>
-<!--<service android:name=".sync.SunshineSyncIntentService"-->
-<!--    android:exported="false" />-->
+
 </manifest>
