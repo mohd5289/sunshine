@@ -320,9 +320,9 @@ public final class SunshineWeatherUtils {
      * @return resource id for the corresponding icon. -1 if no relation is found.
      */
     public static int getSmallArtResourceIdForWeatherCondition(int weatherId) {
+
         /*
-         * Based on weather code data found at:
-         * See http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+         * Based on weather code data for Open Weather Map.
          */
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.ic_storm;
@@ -338,7 +338,7 @@ public final class SunshineWeatherUtils {
             return R.drawable.ic_snow;
         } else if (weatherId >= 701 && weatherId <= 761) {
             return R.drawable.ic_fog;
-        } else if (weatherId == 761 || weatherId == 781) {
+        } else if (weatherId == 761 || weatherId == 771 || weatherId == 781) {
             return R.drawable.ic_storm;
         } else if (weatherId == 800) {
             return R.drawable.ic_clear;
@@ -346,8 +346,16 @@ public final class SunshineWeatherUtils {
             return R.drawable.ic_light_clouds;
         } else if (weatherId >= 802 && weatherId <= 804) {
             return R.drawable.ic_cloudy;
+        } else if (weatherId >= 900 && weatherId <= 906) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 958 && weatherId <= 962) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 951 && weatherId <= 957) {
+            return R.drawable.ic_clear;
         }
-        return -1;
+
+        Log.e(LOG_TAG, "Unknown Weather: " + weatherId);
+        return R.drawable.ic_storm;
     }
 
     /**
@@ -359,9 +367,9 @@ public final class SunshineWeatherUtils {
      * @return resource id for the corresponding icon. -1 if no relation is found.
      */
     public static int getLargeArtResourceIdForWeatherCondition(int weatherId) {
+
         /*
-         * Based on weather code data found at:
-         * http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+         * Based on weather code data for Open Weather Map.
          */
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.art_storm;
@@ -392,6 +400,7 @@ public final class SunshineWeatherUtils {
         } else if (weatherId >= 951 && weatherId <= 957) {
             return R.drawable.art_clear;
         }
+
         Log.e(LOG_TAG, "Unknown Weather: " + weatherId);
         return R.drawable.art_storm;
     }

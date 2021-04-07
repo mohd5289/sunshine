@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
          * Using findViewById, we get a reference to our TextView from xml. This allows us to
          * do things like set the text of the TextView.
          */
-        mWeatherTextView = (TextView) findViewById(R.id.tv_weather_data);
+
 
         mRecyclerView = (RecyclerView)findViewById(R.id.recyclerview_forecast);
         mErrorMessage = (TextView)findViewById(R.id.tv_error_message_display);

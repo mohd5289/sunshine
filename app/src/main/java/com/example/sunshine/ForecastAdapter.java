@@ -22,6 +22,9 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
     private final forecastAdapterOnClickHandler mClickHandler;
   private final Context mContext;
     private Cursor mCursor;
+      private boolean mUseTodayLayout;
+    private static final int VIEW_TYPE_TODAY = 0;
+    private static final int VIEW_TYPE_FUTURE_DAY = 1;
     public interface forecastAdapterOnClickHandler{
         void onClick(long date);
 
@@ -30,6 +33,7 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
     public ForecastAdapter(forecastAdapterOnClickHandler clickHandler, Context mContext){
         mClickHandler =clickHandler;
         this.mContext = mContext;
+        mUseTodayLayout = mContext.getResources().getBoolean(R.bool.use_today_layout);
     }
 
     public  class ForecastAdapterViewHolder extends  RecyclerView.ViewHolder implements View.OnClickListener {
@@ -69,12 +73,28 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
     @NonNull
     @Override
     public ForecastAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        int layoutIdForListItem = R.layout.forecast_list_item;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
+        int layoutId;
 
-        View view = inflater.inflate(layoutIdForListItem,parent,shouldAttachToParentImmediately);
+        switch (viewType) {
+
+//          COMPLETED (12) If the view type of the layout is today, use today layout
+            case VIEW_TYPE_TODAY: {
+                layoutId = R.layout.list_item_forecast_today;
+                break;
+            }
+
+//          COMPLETED (13) If the view type of the layout is future day, use future day layout
+            case VIEW_TYPE_FUTURE_DAY: {
+                layoutId = R.layout.forecast_list_item;
+                break;
+            }
+
+//          COMPLETED (14) Otherwise, throw an IllegalArgumentException
+            default:
+                throw new IllegalArgumentException("Invalid view type, value of " + viewType);
+        }
+        View view = LayoutInflater.from(mContext).inflate(layoutId, parent, false);
+        view.setFocusable(true);
         return new ForecastAdapterViewHolder(view);
     }
 
@@ -82,11 +102,34 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
     public void onBindViewHolder(ForecastAdapterViewHolder holder, int position) {
         mCursor.moveToPosition(position);
 
+
         int weatherId = mCursor.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
         int weatherImageId;
 
-        weatherImageId = SunshineWeatherUtils
-                .getSmallArtResourceIdForWeatherCondition(weatherId);
+        int viewType = getItemViewType(position);
+
+        switch (viewType) {
+//          COMPLETED (15) If the view type of the layout is today, display a large icon
+            case VIEW_TYPE_TODAY:
+                weatherImageId = SunshineWeatherUtils
+                        .getLargeArtResourceIdForWeatherCondition(weatherId);
+                break;
+
+//          COMPLETED (16) If the view type of the layout is today, display a small icon
+            case VIEW_TYPE_FUTURE_DAY:
+                weatherImageId = SunshineWeatherUtils
+                        .getSmallArtResourceIdForWeatherCondition(weatherId);
+                break;
+
+//          COMPLETED (17) Otherwise, throw an IllegalArgumentException
+            default:
+                throw new IllegalArgumentException("Invalid view type, value of " + viewType);
+        }
+
+
+
+     //   weatherImageId = SunshineWeatherUtils
+       //         .getSmallArtResourceIdForWeatherCondition(weatherId);
 
         holder.iconView.setImageResource(weatherImageId);
 
@@ -156,6 +199,17 @@ public class ForecastAdapter extends RecyclerView.Adapter <ForecastAdapter.Forec
         return mCursor.getCount();
 
     }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mUseTodayLayout && position == 0) {
+            return VIEW_TYPE_TODAY;
+//      COMPLETED (11) Otherwise, return the ID for future day viewType
+        } else {
+            return VIEW_TYPE_FUTURE_DAY;
+        }
+    }
+
     void swapCursor(Cursor newCursor) {
         mCursor = newCursor;
 //      COMPLETED (12) After the new Cursor is set, call notifyDataSetChanged
