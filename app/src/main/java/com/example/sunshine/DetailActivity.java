@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
@@ -15,7 +16,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import com.example.sunshine.databinding.ActivityDetailBinding;
 import com.example.sunshine.utilities.*;
+
 
 public class DetailActivity extends AppCompatActivity implements
 //      COMPLETED (21) Implement LoaderManager.LoaderCallbacks<Cursor>
@@ -69,29 +73,15 @@ public class DetailActivity extends AppCompatActivity implements
 //  COMPLETED (10) Remove the mWeatherDisplay TextView declaration
 
     //  COMPLETED (11) Declare TextViews for the date, description, high, low, humidity, wind, and pressure
-    private TextView mDateView;
-    private TextView mDescriptionView;
-    private TextView mHighTemperatureView;
-    private TextView mLowTemperatureView;
-    private TextView mHumidityView;
-    private TextView mWindView;
-    private TextView mPressureView;
+    private ActivityDetailBinding mDetailBinding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
 
-
-        mDateView = (TextView) findViewById(R.id.date);
-        mDescriptionView = (TextView) findViewById(R.id.weather_description);
-        mHighTemperatureView = (TextView) findViewById(R.id.high_temperature);
-        mLowTemperatureView = (TextView) findViewById(R.id.low_temperature);
-        mHumidityView = (TextView) findViewById(R.id.humidity);
-        mWindView = (TextView) findViewById(R.id.wind);
-        mPressureView = (TextView) findViewById(R.id.pressure);
 
         Intent intentThatStartedThisActivity = getIntent();
 
+        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
         // COMPLETED (2) Display the weather forecast that was passed from MainActivity
         mUri = getIntent().getData();
 //      COMPLETED (17) Throw a NullPointerException if that URI is null
@@ -176,24 +166,50 @@ public class DetailActivity extends AppCompatActivity implements
          * the date representation for the local date in local time.
          * SunshineDateUtils#getFriendlyDateString takes care of this for us.
          */
+        int weatherId = data.getInt(INDEX_WEATHER_CONDITION_ID);
+        /* Use our utility method to determine the resource ID for the proper art */
+        int weatherImageId = SunshineWeatherUtils.getLargeArtResourceIdForWeatherCondition(weatherId);
+
+        /* Set the resource ID on the icon to display the art */
+        mDetailBinding.primaryInfo.weatherIcon.setImageResource(weatherImageId);
+
+        /****************
+         * Weather Date *
+         ****************/
+        /*
+         * Read the date from the cursor. It is important to note that the date from the cursor
+         * is the same date from the weather SQL table. The date that is stored is a GMT
+         * representation at midnight of the date when the weather information was loaded for.
+         *
+         * When displaying this date, one must add the GMT offset (in milliseconds) to acquire
+         * the date representation for the local date in local time.
+         * SunshineDateUtils#getFriendlyDateString takes care of this for us.
+         */
         long localDateMidnightGmt = data.getLong(INDEX_WEATHER_DATE);
         String dateText = SunshineDateUtils.getFriendlyDateString(this, localDateMidnightGmt, true);
 
-        mDateView.setText(dateText);
+//      COMPLETED (8) Use mDetailBinding to display the date
+        mDetailBinding.primaryInfo.date.setText(dateText);
 
-//      COMPLETED (27) Display the weather description (using SunshineWeatherUtils)
         /***********************
          * Weather Description *
          ***********************/
-        /* Read weather condition ID from the cursor (ID provided by Open Weather Map) */
-        int weatherId = data.getInt(INDEX_WEATHER_CONDITION_ID);
         /* Use the weatherId to obtain the proper description */
         String description = SunshineWeatherUtils.getStringForWeatherCondition(this, weatherId);
 
-        /* Set the text */
-        mDescriptionView.setText(description);
+//      COMPLETED (15) Create the content description for the description for a11y
+        /* Create the accessibility (a11y) String from the weather description */
+        String descriptionA11y = getString(R.string.a11y_forecast, description);
 
-//      COMPLETED (28) Display the high temperature
+//      COMPLETED (9) Use mDetailBinding to display the description and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.primaryInfo.weatherDescription.setText(description);
+        mDetailBinding.primaryInfo.weatherDescription.setContentDescription(descriptionA11y);
+
+//      COMPLETED (16) Set the content description of the icon to the same as the weather description a11y text
+        /* Set the content description on the weather image (for accessibility purposes) */
+        mDetailBinding.primaryInfo.weatherIcon.setContentDescription(descriptionA11y);
+
         /**************************
          * High (max) temperature *
          **************************/
@@ -206,10 +222,15 @@ public class DetailActivity extends AppCompatActivity implements
          */
         String highString = SunshineWeatherUtils.formatTemperature(this, highInCelsius);
 
-        /* Set the text */
-        mHighTemperatureView.setText(highString);
+//      COMPLETED (17) Create the content description for the high temperature for a11y
+        /* Create the accessibility (a11y) String from the weather description */
+        String highA11y = getString(R.string.a11y_high_temp, highString);
 
-//      COMPLETED (29) Display the low temperature
+//      COMPLETED (10) Use mDetailBinding to display the high temperature and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.primaryInfo.highTemperature.setText(highString);
+        mDetailBinding.primaryInfo.highTemperature.setContentDescription(highA11y);
+
         /*************************
          * Low (min) temperature *
          *************************/
@@ -222,10 +243,14 @@ public class DetailActivity extends AppCompatActivity implements
          */
         String lowString = SunshineWeatherUtils.formatTemperature(this, lowInCelsius);
 
-        /* Set the text */
-        mLowTemperatureView.setText(lowString);
+//      COMPLETED (18) Create the content description for the low temperature for a11y
+        String lowA11y = getString(R.string.a11y_low_temp, lowString);
 
-//      COMPLETED (30) Display the humidity
+//      COMPLETED (11) Use mDetailBinding to display the low temperature and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.primaryInfo.lowTemperature.setText(lowString);
+        mDetailBinding.primaryInfo.lowTemperature.setContentDescription(lowA11y);
+
         /************
          * Humidity *
          ************/
@@ -233,10 +258,17 @@ public class DetailActivity extends AppCompatActivity implements
         float humidity = data.getFloat(INDEX_WEATHER_HUMIDITY);
         String humidityString = getString(R.string.format_humidity, humidity);
 
-        /* Set the text */
-        mHumidityView.setText(humidityString);
+//      COMPLETED (20) Create the content description for the humidity for a11y
+        String humidityA11y = getString(R.string.a11y_humidity, humidityString);
 
-//      COMPLETED (31) Display the wind speed and direction
+//      COMPLETED (12) Use mDetailBinding to display the humidity and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.extraDetails.humidity.setText(humidityString);
+        mDetailBinding.extraDetails.humidity.setContentDescription(humidityA11y);
+
+//      COMPLETED (19) Set the content description of the humidity label to the humidity a11y String
+        mDetailBinding.extraDetails.humidityLabel.setContentDescription(humidityA11y);
+
         /****************************
          * Wind speed and direction *
          ****************************/
@@ -245,10 +277,17 @@ public class DetailActivity extends AppCompatActivity implements
         float windDirection = data.getFloat(INDEX_WEATHER_DEGREES);
         String windString = SunshineWeatherUtils.getFormattedWind(this, windSpeed, windDirection);
 
-        /* Set the text */
-        mWindView.setText(windString);
+//      COMPLETED (21) Create the content description for the wind for a11y
+        String windA11y = getString(R.string.a11y_wind, windString);
 
-//      COMPLETED (32) Display the pressure
+//      COMPLETED (13) Use mDetailBinding to display the wind and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.extraDetails.windMeasurement.setText(windString);
+        mDetailBinding.extraDetails.windMeasurement.setContentDescription(windA11y);
+
+//      COMPLETED (22) Set the content description of the wind label to the wind a11y String
+        mDetailBinding.extraDetails.windLabel.setContentDescription(windA11y);
+
         /************
          * Pressure *
          ************/
@@ -264,10 +303,17 @@ public class DetailActivity extends AppCompatActivity implements
          */
         String pressureString = getString(R.string.format_pressure, pressure);
 
-        /* Set the text */
-        mPressureView.setText(pressureString);
+//      COMPLETED (23) Create the content description for the pressure for a11y
+        String pressureA11y = getString(R.string.a11y_pressure, pressureString);
 
-//      COMPLETED (33) Store a forecast summary in mForecastSummary
+//      COMPLETED (14) Use mDetailBinding to display the pressure and set the content description
+        /* Set the text and content description (for accessibility purposes) */
+        mDetailBinding.extraDetails.pressure.setText(pressureString);
+        mDetailBinding.extraDetails.pressure.setContentDescription(pressureA11y);
+
+//      COMPLETED (24) Set the content description of the pressure label to the pressure a11y String
+        mDetailBinding.extraDetails.pressureLabel.setContentDescription(pressureA11y);
+
         /* Store the forecast summary String in our forecast summary field to share later */
         mForecastSummary = String.format("%s - %s - %s/%s",
                 dateText, description, highString, lowString);
