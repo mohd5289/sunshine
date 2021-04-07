@@ -41,6 +41,8 @@ import androidx.loader.content.Loader;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.Configuration;
+import androidx.work.WorkManager;
 
 import com.example.sunshine.data.SunshinePreferences;
 import com.example.sunshine.data.WeatherContract;
@@ -49,6 +51,8 @@ import com.example.sunshine.utilities.NetworkUtils;
 import com.example.sunshine.utilities.OpenWeatherJsonUtils;
 
 import java.net.URL;
+
+import static androidx.work.Configuration.*;
 
 
 public class MainActivity extends AppCompatActivity
@@ -113,6 +117,8 @@ public class MainActivity extends AppCompatActivity
         loadWeatherData();
         getSupportLoaderManager().initLoader(loaderId, bundleForLoader, MainActivity.this);
         Log.d(TAG, "onCreate: registering preference changed listener");
+      //  WorkManager.initialize(this, new Builder().build());
+
         SunshineSyncUtils.initialize(this);
 
     }
@@ -269,4 +275,6 @@ public class MainActivity extends AppCompatActivity
                weatherDetailIntent.setData(uriForDateClicked);
                startActivity(weatherDetailIntent);
            }
+
+
        }

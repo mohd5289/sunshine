@@ -20,7 +20,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"></meta-data>
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/AppTheme.Forecast">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,14 +35,10 @@
         android:exported="false"></provider>
         <service android:name=".sync.SunshineSyncIntentService"
             android:exported="false" />
-        <service
-            android:name=".sync.SunshineFirebaseJobService"
-            android:exported="false">
+
+
             <!-- COMPLETED (9) Declare an intent filter with the action ACTION_EXECUTE -->
-            <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
-            </intent-filter>
-        </service>
+
     </application>
 
 </manifest>
